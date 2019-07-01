@@ -16,4 +16,16 @@ pip install -e .
 
 ## Usage
 
+```
+python -m tyros.client
+```
+
+Running this from the terminal starts a client receiving data from TyroS and 
+pushing it via LSL. Switching devices (re-)starts the respectice LSL outlet. 
+Consider that the TyroS Data Server port has to be set accordingly in the TyroS
+settings, and that TyroS only starts its data server after the calibration 
+of the device has been performed. 
+
+Additionally, currently only the Amadeo hand robot has been tested.
+
 
