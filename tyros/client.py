@@ -57,8 +57,8 @@ def make_outlet(device:str="Amadeo", roms=None):
         
         
         if roms is not None:
-            labels = chain((f"extension" for x in range(1,6,1)),
-                           (f"flexion" for x in range(1,6,1)))
+            labels = chain((f"ext_{f}" for f in finger_names),
+                           (f"flex_{f}" for f in finger_names))
             romdesc = info.desc().append_child("ROM")
             for rom, lbl in zip(roms, labels):
                 romdesc.append_child("channel") \
