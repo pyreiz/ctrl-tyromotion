@@ -36,7 +36,7 @@ def make_outlet(device:str="Amadeo"):
         finger_names = ["pollex", "index", "medius", "anularius", "minimus"]
         types = chain((f"extension" for x in range(1,6,1)),
                       (f"force" for x in range(1,6,1)))
-        units = chain(("a.u." for x in range(1,6,1)),
+        units = chain(("au" for x in range(1,6,1)),
                       ("N" for x in range(1,6,1)))
         names = chain((f"position_{f}" for f in finger_names),
                        (f"force_{f}" for f in finger_names))
@@ -58,13 +58,16 @@ class Client():
     def __init__(self, host="127.0.0.1", port=61585):
         self.interface = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.host = host
-        self.port = port    
+        self.port = port   
+        self.is_connected = False 
         
     def connect(self):
         self.interface.connect((self.host, self.port))
-                
+        self.is_connected = True
+       
     def close(self):
         self.interface.close()
+        self.is_connected = False
  
     @property
     def device(self):
@@ -100,7 +103,11 @@ class Client():
     
 if __name__ == "__main__":
     client = Client()
-    client.connect()
+    while not client.is_connected:
+        try:
+            client.connect()
+        except Exception as e:
+            print(e)
     while True:
         chunk, tstamp = client.receive()        
         print(chunk, "at ", tstamp)
