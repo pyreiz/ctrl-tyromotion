@@ -2,8 +2,9 @@ import socket
 import pylsl
 import time
 from xml.etree import ElementTree
-from itertools import chain
+from itertools import chain, repeat
 import logging
+from typing import List
 logger = logging.getLogger("tyromotion")
 logging.basicConfig(level=logging.DEBUG)
 # %%
@@ -141,6 +142,24 @@ class Client():
             tstamp = pylsl.local_clock()        
         self._outlet.push_sample(chunk, tstamp)
 
+    def set_targetpos(self, position:List[float]=[0,0,0,0,0]):
+        if len(position) != 5:
+            raise ValueError("You must specify position for all five fingers")
+        msg = '\t'.join(f"{pos:.3f}" for pos in position)
+        msg = "<targetPos>" + msg + "</targetPos>"
+        self.send(msg)
+        
+    def set_velocity(self, velocity:List[float]=[.1,.1,.1,.1,.1]):
+        if len(velocity) != 5:
+            raise ValueError("You must specify velocity for all five fingers")
+        if any((v>0.2 for v in velocity)):
+            raise ValueError("Velocity should not be higher than .2")
+        if any((v<0 for v in velocity)):
+            raise ValueError("Velocity can not be negative")
+        msg = '\t'.join(f"{velo:.3f}" for velo in velocity)
+        msg = "<velocity>" + msg + "</velocity>"
+        self.send(msg)
+                    
 # %%
 def main():
     client = Client()
@@ -161,21 +180,14 @@ def test():
     while not client.is_connected:
         try:
             client.connect()
+            chunk, tstamp = client.receive() 
         except Exception as e:
             print(e)
-
-    xml, tstamp = client._receive()    
-    msg = "<requestROM/>"
-    encoded = f"<AmadeoCmd> {msg} </AmadeoCmd>".encode("ascii")
-    client.interface.sendall(encoded)
-    while True:
-        xml, tstamp = client._receive()    
-        print('.', end="")
-        if xml.tag == "AmadeoROM":
-            break
-        time.sleep(0.01)
-       # print(xml, "at ", tstamp)
-
+    
+    client.set_velocity()
+    client.set_targetpos([-1,-1,-1,-1,-1])
+    time.sleep(1)
+    client.set_targetpos()
     client.close()
 # %%
 if __name__ == "__main__":
