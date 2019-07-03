@@ -142,7 +142,7 @@ class Client():
             tstamp = pylsl.local_clock()        
         self._outlet.push_sample(chunk, tstamp)
 
-    def set_targetpos(self, position:List[float]=[0,0,0,0,0]):
+    def set_position(self, position:List[float]=[0,0,0,0,0]):
         if len(position) != 5:
             raise ValueError("You must specify position for all five fingers")
         msg = '\t'.join(f"{pos:.3f}" for pos in position)
@@ -185,9 +185,9 @@ def test():
             print(e)
     
     client.set_velocity()
-    client.set_targetpos([-1,-1,-1,-1,-1])
+    client.set_position([-1,-1,-1,-1,-1])
     time.sleep(1)
-    client.set_targetpos()
+    client.set_position()
     client.close()
 # %%
 if __name__ == "__main__":
